@@ -1,10 +1,14 @@
 const knex = require('../database');
 
 module.exports = {
-  listAll: async (req, res) => {
-    const results = await knex('users');
+  listAll: async (req, res, next) => {
+    try {
+      const results = await knex('users');
 
-    return res.json(results);
+      return res.json(results);
+    } catch (err) {
+      next(err);
+    }
   },
 
   create: async (req, res, next) => {

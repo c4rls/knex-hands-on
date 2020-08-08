@@ -3,7 +3,7 @@ const knex = require('../database');
 module.exports = {
   listAll: async (req, res, next) => {
     try {
-      const results = await knex('users');
+      const results = await knex('users').where({ deleted_at: null });
 
       return res.json(results);
     } catch (err) {
@@ -28,6 +28,10 @@ module.exports = {
     const { name } = req.body;
 
     try {
+      const [user] = await knex('users').where({ id });
+
+      if (user.deleted_at) return res.status(400).json({ message: 'deleted user' });
+
       await knex('users').update({ name }).where({ id });
 
       return res.sendStatus(200);
@@ -40,7 +44,9 @@ module.exports = {
     const { id } = req.params;
 
     try {
-      await knex('users').delete().where({ id });
+      await knex('users')
+        .update({ deleted_at: new Date() })
+        .where({ id });
 
       return res.sendStatus(200);
     } catch (err) {
